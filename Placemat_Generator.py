@@ -188,6 +188,7 @@ def compose_tag(
     font_size: int | None = None,
     random_bubbles: bool = False,
     flowers: bool = False,
+    table_label: str = "",
 ) -> Image.Image:
     W, H = size
     img = Image.new("RGB", size, "white")
@@ -230,17 +231,28 @@ def compose_tag(
     border = max(2, min(W, H)//25)
     d.rectangle([(0,0), (W-1, H-1)], outline=BLACK, width=border)
 
-    fs = font_size or int(H*0.35)
+    fs = font_size or int(H * 0.25)
     try:
         font = ImageFont.truetype(font_path, fs)
+        small_font = ImageFont.truetype(font_path, int(fs * 0.7))
     except OSError:
         print(f"Font '{font_path}' not found; using default.")
         font = ImageFont.load_default()
+        small_font = ImageFont.load_default()
 
-    tw, th = (lambda b: (b[2]-b[0], b[3]-b[1]))(font.getbbox(name))
-    d.text(((W-tw)/2, (H-th)/2), name, fill="black", font=font)
+    name_tw, name_th = (lambda b: (b[2]-b[0], b[3]-b[1]))(font.getbbox(name))
+    table_tw, table_th = (lambda b: (b[2]-b[0], b[3]-b[1]))(small_font.getbbox(table_label)) if table_label else (0, 0)
+
+    total_height = name_th + (table_th if table_label else 0) + int(H * 0.05)
+    name_y = (H - total_height) // 2
+    table_y = name_y + name_th + int(H * 0.02)
+
+    d.text(((W - name_tw) / 2, name_y), name, fill="black", font=font)
+    if table_label:
+        d.text(((W - table_tw) / 2, table_y), table_label, fill="black", font=small_font)
 
     return img
+
 
 # --------------------------------------------------
 # PDF helper
@@ -331,6 +343,7 @@ def main() -> None:
             font_size=args.font_size,
             random_bubbles=args.random_bubbles,
             flowers=args.flowers,
+            table_label=tbl,  # <- this passes the table label
         )
         img.save(out_path, "PNG")
         tag_paths.append(out_path)
