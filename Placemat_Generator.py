@@ -10,7 +10,7 @@ Changes from original version
   inside the printable area.
 * ➡Still supports two‑per‑row layout by default; customise with `--cols`,
   `--margin`, and `--page-size`.
-* ✅ Dependencies: `pip install pillow reportlab`.
+* Dependencies: `pip install pillow reportlab`.
 
 Typical usage
 -------------
